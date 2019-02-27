@@ -1,0 +1,21 @@
+APP_NAME=flask-boilerplate
+
+setup:
+	rm -rf ./.git
+	echo '# $(APP_NAME)' > ./README.md
+	echo 'APP_NAME=$(APP_NAME)' > ./.env
+	mkdir -p ./secrets/local/
+	mkdir -p ./secrets/dev/
+	mkdir -p ./secrets/staging/
+	echo 'TEST_SECRET=test_secret' > ./secrets/local/.env
+	echo 'TEST_SECRET=test_secret' > ./secrets/dev/.env
+	echo 'TEST_SECRET=test_secret' > ./secrets/staging/.env
+	cp ./secrets/local/.env ./deploy/
+	git init
+	git add -A
+	git commit -m "Init commit"
+	rm -rf Makefile-setup
+	make push_secrets ENV=dev
+	make push_secrets ENV=staging
+	make push_secrets
+	make test

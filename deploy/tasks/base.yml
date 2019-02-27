@@ -1,0 +1,65 @@
+- hosts: 'web'
+  vars:
+  - aws_key: '{{aws_key}}'
+  - aws_secret: '{{aws_secret}}'
+  - email: 'example@example.com'
+  - domain: '{{version}}.example.com'
+  - user: 'ubuntu'
+  environment:
+  - AWS_ACCESS_KEY_ID: '{{aws_key}}'
+  - AWS_SECRET_ACCESS_KEY: '{{aws_secret}}'
+  become: yes
+  tasks:
+  # pip3
+  - name: 'Install pip3'
+    apt:
+      name: 'python3-pip'
+      update_cache: yes
+  # Nginx
+  - name: 'Install nginx'
+    apt:
+      name: 'nginx'
+  # Certbot
+  - name: 'Install software properties'
+    apt:
+      name: 'software-properties-common'
+  - name: 'Add certbot repo'
+    apt_repository:
+      repo: 'ppa:certbot/certbot'
+  - name: 'Install certbot nginx plugin'
+    apt:
+      name: 'python3-certbot-nginx'
+  - name: 'Stop nginx'
+    service:
+      name: 'nginx'
+      state: 'stopped'
+  - name: 'Generate certificate'
+    command: 'certbot certonly --standalone --agree-tos --keep-until-expiring --preferred-challenges http --email {{email}} -d {{domain}}'
+  - name: 'Start Nginx'
+    service:
+      name: 'nginx'
+      state: 'started'
+      enabled: yes
+  # Docker
+  - name: 'Install docker'
+    apt:
+      name: 'docker.io'
+  - name: 'Start docker'
+    service:
+      name: 'docker'
+      state: 'started'
+      enabled: yes
+  - name: 'Add user to docker group'
+    command: 'usermod -aG docker {{user}}'
+  - name: 'Install Docker python'
+    pip:
+      name: 'docker'
+  # awscli
+  - name: 'Install AWS CLI'
+    pip:
+      name: 'awscli'
+  # File system
+  - name: 'Make app directory'
+    file:
+      name: '/home/{{user}}/app'
+      state: 'directory'

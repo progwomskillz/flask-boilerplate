@@ -20,9 +20,6 @@
     apt:
       name: 'nginx'
   # Certbot
-  - name: 'Install software properties'
-    apt:
-      name: 'software-properties-common'
   - name: 'Add certbot repo'
     apt_repository:
       repo: 'ppa:certbot/certbot'
